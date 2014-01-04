@@ -6,6 +6,7 @@ from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET
 
 import stratum.logger
+import accept_log
 log = stratum.logger.get_logger('proxy')
 
 class Root(Resource):
@@ -37,6 +38,7 @@ class Root(Resource):
         response_time = (time.time() - start_time) * 1000
         if result == True:
             log.warning("[%dms] Share from '%s' accepted, diff %d" % (response_time, worker_name, self.job_registry.difficulty))
+            accept_log.accepted()
         else:
             log.warning("[%dms] Share from '%s' REJECTED" % (response_time, worker_name))
          

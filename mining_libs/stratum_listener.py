@@ -11,6 +11,7 @@ from stratum.custom_exceptions import ServiceException, RemoteServiceException
 from jobs import JobRegistry
 
 import stratum.logger
+import accept_log
 log = stratum.logger.get_logger('proxy')
 
 def var_int(i):
@@ -179,4 +180,5 @@ class StratumProxyService(GenericService):
 
         response_time = (time.time() - start) * 1000
         log.info("[%dms] Share from '%s' accepted, diff %d" % (response_time, worker_name, DifficultySubscription.difficulty))
+        accept_log.accepted()
         defer.returnValue(result)

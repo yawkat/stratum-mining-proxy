@@ -44,6 +44,7 @@ def parse_args():
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable low-level debugging messages')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true', help='Make output more quiet')
     parser.add_argument('-i', '--pid-file', dest='pid_file', type=str, help='Store process pid to the file')    
+    parser.add_argument('-l', '--accepted-log', dest="accepted_log_name", type=str, help='Append the current date to the given file whenever a share is accepted')
     return parser.parse_args()
 
 from stratum import settings
@@ -75,6 +76,7 @@ from mining_libs import version
 from mining_libs import utils
 
 import stratum.logger
+import accept_log
 log = stratum.logger.get_logger('proxy')
 
 def on_shutdown(f):
@@ -97,7 +99,7 @@ def on_connect(f, workers, job_registry):
     if args.custom_user:
         log.warning("Authorizing custom user %s, password %s" % (args.custom_user, args.custom_password))
         workers.authorize(args.custom_user, args.custom_password)
-        
+    
     # Subscribe for receiving jobs
     log.info("Subscribing for mining jobs")
     (_, extranonce1, extranonce2_size) = (yield f.rpc('mining.subscribe', []))[:3]
@@ -223,6 +225,9 @@ def main(args):
 
     if args.test:
         f.on_connect.addCallback(test_launcher, job_registry)
+    
+    if args.accepted_log_name:
+        accept_log.setup(args.accepted_log_name)
     
     # Cleanup properly on shutdown
     reactor.addSystemEventTrigger('before', 'shutdown', on_shutdown, f)
